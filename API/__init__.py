@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restx import Resource, Api
+from flask_restx import Api
 from flask_mongoengine import MongoEngine
 from dotenv import load_dotenv
 import os
@@ -15,3 +15,5 @@ app.config["SECRET_KEY"] = "".join(
     random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
     for _ in range(16)
 )
+
+from API import routes
