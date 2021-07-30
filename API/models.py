@@ -1,4 +1,5 @@
 from API import db
+from bson.objectid import ObjectId
 
 class Subtask(db.EmbeddedDocument):
     sid = db.ObjectIdField(default=ObjectId)
