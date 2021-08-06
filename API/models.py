@@ -21,3 +21,10 @@ class User(db.Document):
     password = db.StringField()
     date = db.DateTimeField()
     todos = db.ListField(db.EmbeddedDocumentField(Todo))
+
+    def to_json(self):
+        return {
+            "name" : self.name,
+            "nickname" : self.nickname,
+            "todo" : self.todos
+        }
