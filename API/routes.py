@@ -1,23 +1,20 @@
+import json
+from datetime import date as D
 from flask import jsonify, request
 from flask_restx import Resource
 from API import api
 from API.models import User, Todo, Subtask
-from datetime import date as D
-import json
-
 
 @api.route("/list")
 class GetData(Resource):
     def get(self):
-        name = request.json.get("name")
-        try:
-            data = User.objects(name=name).first()
-            if data != None:
-                return jsonify(data)
-            else:
-                return jsonify({"msg": "Data not Found"})
-        except:
-            return jsonify({"msg": "Error while fetching the data."}, 404)
+        id = request.json.get("id")
+        data = User.objects(id=id)
+        if data != None:
+            return jsonify(data)
+        else:
+            return jsonify({"msg": "Data not Found"})
+        return jsonify({"msg": "Error while fetching the data."}, 404)
 
 
 @api.route("/add")
@@ -48,5 +45,28 @@ class AddData(Resource):
             ]
             user.save()
             return jsonify({"msg": "data added"})
-        except:
-            return jsonify({"msg" : "error"})
+        except ValueError:
+            return jsonify({"msg": "error"})
+
+
+@api.route("/del")
+class Deldata(Resource):
+    def delete(self):
+        id = request.json.get("id")
+        data = User.objects(id=id)
+        if data == id:
+            data.delete()
+            return jsonify({"msg" : "user deleted" })
+        else:
+            return jsonify({"msg": "no such user found"})
+
+@api.route("/update")
+class UpdateData(Resource):
+    def put(self):
+        record = json.loads(request.data)
+        user = User.objects(name = record["name"]).first()
+        if not user:
+            return jsonify({"msg" : "No user found"})
+        else:
+            user.update(nickname = record["nickname"], email = record["email"])
+            return jsonify({"msg" : "user updated"})
