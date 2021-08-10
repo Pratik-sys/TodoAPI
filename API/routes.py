@@ -5,11 +5,11 @@ from flask_restx import Resource
 from API import api
 from API.models import User, Todo, Subtask
 
-@api.route("/list")
-class GetData(Resource):
-    def get(self):
-        id = request.json.get("id")
-        data = User.objects(id=id)
+
+@api.route("/<string:user_id>/todos")
+class GetAll(Resource):
+    def get(self, user_id: str):
+        data = User.objects.get_or_404(id=user_id)
         if data != None:
             return jsonify(data)
         else:
@@ -17,7 +17,7 @@ class GetData(Resource):
         return jsonify({"msg": "Error while fetching the data."}, 404)
 
 
-@api.route("/add")
+@api.route("/todo/add")
 class AddData(Resource):
     def post(self):
         record = json.loads(request.data)
@@ -49,24 +49,24 @@ class AddData(Resource):
             return jsonify({"msg": "error"})
 
 
-@api.route("/del")
+@api.route("/<string:user_id>/todo/delete")
 class Deldata(Resource):
-    def delete(self):
-        id = request.json.get("id")
-        data = User.objects(id=id)
+    def delete(self, user_id: str):
+        data = User.objects.get_or_404(id=user_id)
         if data == id:
             data.delete()
-            return jsonify({"msg" : "user deleted" })
+            return jsonify({"msg": "user deleted"})
         else:
             return jsonify({"msg": "no such user found"})
 
-@api.route("/update")
+
+@api.route("/todo/update")
 class UpdateData(Resource):
     def put(self):
         record = json.loads(request.data)
-        user = User.objects(name = record["name"]).first()
+        user = User.objects(name=record["name"]).first()
         if not user:
-            return jsonify({"msg" : "No user found"})
+            return jsonify({"msg": "No user found"})
         else:
-            user.update(nickname = record["nickname"], email = record["email"])
-            return jsonify({"msg" : "user updated"})
+            user.update(nickname=record["nickname"], email=record["email"])
+            return jsonify({"msg": "user updated"})
