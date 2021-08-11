@@ -65,3 +65,21 @@ class UpdateData(Resource):
             user.update(nickname=record["nickname"], email=record["email"])
             return jsonify({"msg": "user updated"})
 
+@api.route("/user/register")
+class RegisterUser(Resource):
+    def post(self):
+        record = json.loads(request.data)
+        try:
+            user = User(
+                name = record["name"],
+                nickname = record["nickname"],
+                email = record["email"],
+                password = record["password"],
+                date = D.today()
+
+            )
+            
+            user.save()
+            return jsonify({"msg": "User added sucessfully"})
+        except ValueError:
+            return jsonify({"msg": "Failed adding user"})
