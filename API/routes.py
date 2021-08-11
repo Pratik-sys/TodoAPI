@@ -17,18 +17,12 @@ class GetAll(Resource):
         return jsonify({"msg": "Error while fetching the data."}, 404)
 
 
-@api.route("/todo/add")
+@api.route("/<string:user_id>/todo/add")
 class AddData(Resource):
-    def post(self):
+    def post(self, user_id:str):
         record = json.loads(request.data)
         try:
-            user = User(
-                name=record["name"],
-                nickname=record["nickname"],
-                email=record["email"],
-                password=record["password"],
-                date=D.today(),
-            )
+            user = User.objects.get_or_404(id=user_id)
             user.todos = [
                 Todo(
                     title=record["title"],
@@ -70,3 +64,4 @@ class UpdateData(Resource):
         else:
             user.update(nickname=record["nickname"], email=record["email"])
             return jsonify({"msg": "user updated"})
+
