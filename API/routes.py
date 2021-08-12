@@ -19,11 +19,10 @@ class GetAll(Resource):
 
 @api.route("/<string:user_id>/todo/add")
 class AddData(Resource):
-    def post(self, user_id:str):
+    def post(self, user_id: str):
         record = json.loads(request.data)
         try:
-            user = User.objects.get_or_404(id=user_id)
-            user.todos = [
+            Todos = [
                 Todo(
                     title=record["title"],
                     subtasks=[
@@ -37,7 +36,7 @@ class AddData(Resource):
                     date=D.today(),
                 )
             ]
-            user.save()
+            User.objects(id=user_id).update(push__todos__1 =Todos)
             return jsonify({"msg": "data added"})
         except ValueError:
             return jsonify({"msg": "error"})
@@ -65,20 +64,20 @@ class UpdateData(Resource):
             user.update(nickname=record["nickname"], email=record["email"])
             return jsonify({"msg": "user updated"})
 
+
 @api.route("/user/register")
 class RegisterUser(Resource):
     def post(self):
         record = json.loads(request.data)
         try:
             user = User(
-                name = record["name"],
-                nickname = record["nickname"],
-                email = record["email"],
-                password = record["password"],
-                date = D.today()
-
+                name=record["name"],
+                nickname=record["nickname"],
+                email=record["email"],
+                password=record["password"],
+                date=D.today()
             )
-            
+
             user.save()
             return jsonify({"msg": "User added sucessfully"})
         except ValueError:
