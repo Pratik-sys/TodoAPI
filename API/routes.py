@@ -53,16 +53,12 @@ class AddSubtaskData(Resource):
             return jsonify({"msg": "error"})
 
 
-@api.route("/<string:user_id>/todo/delete")
+@api.route("/<string:user_id>/todo/<string:todo_id>/delete")
 class DeleteData(Resource):
-    def delete(self, user_id: str):
-        data = User.objects.get_or_404(id=user_id)
-        if data == id:
-            data.delete()
-            return jsonify({"msg": "user deleted"})
-        else:
-            return jsonify({"msg": "no such user found"})
-
+    def delete(self, user_id: str, todo_id:str):
+        data = Todo.objects.filter(id=todo_id, user=user_id).first()
+        data.delete()
+        return jsonify({"msg": "deleted"})
 
 @api.route("/<string:user_id>/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):

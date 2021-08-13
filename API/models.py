@@ -18,7 +18,7 @@ class Todo(db.Document):
 
 
 class Subtask(db.Document):
-    todo = db.ReferenceField(Todo)
+    todo = db.ReferenceField(Todo, reverse_delete_rule=db.CASCADE)
     taskName = db.StringField()
     completed = db.BooleanField(default = False)
     date = db.DateTimeField()
