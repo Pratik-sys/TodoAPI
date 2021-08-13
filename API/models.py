@@ -1,18 +1,6 @@
 from API import db
 from bson.objectid import ObjectId
 
-class Subtask(db.EmbeddedDocument):
-    sid = db.ObjectIdField(default=ObjectId)
-    taskName = db.StringField()
-    completed = db.BooleanField()
-    date = db.DateTimeField()
-
-class Todo(db.EmbeddedDocument):
-    tid = db.ObjectIdField(default=ObjectId)
-    title = db.StringField()
-    subtasks = db.ListField(db.EmbeddedDocumentField(Subtask))
-    theme = db.StringField()
-    date = db.DateTimeField()
 
 class User(db.Document):
     name = db.StringField()
@@ -20,11 +8,17 @@ class User(db.Document):
     email = db.StringField()
     password = db.StringField()
     date = db.DateTimeField()
-    todos = db.ListField(db.EmbeddedDocumentField(Todo))
 
-    def to_json(self):
-        return {
-            "name" : self.name,
-            "nickname" : self.nickname,
-            "todo" : self.todos
-        }
+
+class Todo(db.Document):
+    user = db.ReferenceField(User)
+    title = db.StringField()
+    theme = db.StringField()
+    date = db.DateTimeField()
+
+
+class Subtask(db.Document):
+    todo = db.ReferenceField(Todo)
+    taskName = db.StringField()
+    completed = db.BooleanField(default = False)
+    date = db.DateTimeField()
