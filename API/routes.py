@@ -16,9 +16,8 @@ class GetAll(Resource):
             return jsonify({"msg": "Data not Found"})
         return jsonify({"msg": "Error while fetching the data."}, 404)
 
-
 @api.route("/<string:user_id>/todo/add")
-class AddData(Resource):
+class AddTodoData(Resource):
     def post(self, user_id: str):
         record = json.loads(request.data)
         try:
@@ -34,7 +33,7 @@ class AddData(Resource):
         except ValueError:
             return jsonify({"msg": "error"})
 @api.route("/<string:todo_id>/subtask/add")
-class AddData(Resource):
+class AddSubtaskData(Resource):
     def post(self, todo_id: str):
         record = json.loads(request.data)
         try:
@@ -51,7 +50,7 @@ class AddData(Resource):
             return jsonify({"msg": "error"})
 
 @api.route("/<string:user_id>/todo/delete")
-class Deldata(Resource):
+class DeleteData(Resource):
     def delete(self, user_id: str):
         data = User.objects.get_or_404(id=user_id)
         if data == id:
@@ -62,7 +61,7 @@ class Deldata(Resource):
 
 
 @api.route("/<string:user_id>/todo/<string:todo_id>/update")
-class UpdateData(Resource):
+class UpdateTodoData(Resource):
     def put(self, user_id: str, todo_id: str):
         data = Todo.objects.filter(id =todo_id, user = user_id).first()
         print(data)
@@ -74,7 +73,7 @@ class UpdateData(Resource):
             return jsonify({"msg": "todo updated"})
 
 @api.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
-class UpdateData(Resource):
+class UpdateSubtaskData(Resource):
     def put(self, todo_id: str, subtask_id: str):
         data = Subtask.objects.filter(id =subtask_id, todo = todo_id).first()
         print(data)
