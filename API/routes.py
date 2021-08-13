@@ -22,25 +22,33 @@ class AddData(Resource):
     def post(self, user_id: str):
         record = json.loads(request.data)
         try:
-            Todos = [
-                Todo(
-                    title=record["title"],
-                    subtasks=[
-                        Subtask(
-                            taskName=record["taskname"],
-                            completed=record["completed"],
-                            date=D.today(),
-                        )
-                    ],
-                    theme=record["theme"],
-                    date=D.today(),
-                )
-            ]
-            User.objects(id=user_id).update(push__todos__1 =Todos)
+            user = User.objects.get(id=user_id)
+            todo = Todo(
+                user=user,
+                title=record["title"],
+                theme=record["theme"],
+                date=D.today()
+            )
+            todo.save()
             return jsonify({"msg": "data added"})
         except ValueError:
             return jsonify({"msg": "error"})
-
+@api.route("/<string:todo_id>/subtask/add")
+class AddData(Resource):
+    def post(self, todo_id: str):
+        record = json.loads(request.data)
+        try:
+            todo = Todo.objects.get(id=todo_id)
+            subtask = Subtask(
+                todo=todo,
+                taskName=record["taskname"],
+                completed=record["completed"],
+                date=D.today()
+            )
+            subtask.save()
+            return jsonify({"msg": "data added"})
+        except ValueError:
+            return jsonify({"msg": "error"})
 
 @api.route("/<string:user_id>/todo/delete")
 class Deldata(Resource):
@@ -53,18 +61,29 @@ class Deldata(Resource):
             return jsonify({"msg": "no such user found"})
 
 
-@api.route("/todo/update")
+@api.route("/<string:user_id>/todo/<string:todo_id>/update")
 class UpdateData(Resource):
-    def put(self):
+    def put(self, user_id: str, todo_id: str):
+        data = Todo.objects.filter(id =todo_id, user = user_id).first()
+        print(data)
         record = json.loads(request.data)
-        user = User.objects(name=record["name"]).first()
-        if not user:
-            return jsonify({"msg": "No user found"})
+        if data and data == None:
+            return jsonify({"msg": "No todo found"})
         else:
-            user.update(nickname=record["nickname"], email=record["email"])
-            return jsonify({"msg": "user updated"})
+            data.modify(title=record["title"], theme=record["theme"])
+            return jsonify({"msg": "todo updated"})
 
-
+@api.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
+class UpdateData(Resource):
+    def put(self, todo_id: str, subtask_id: str):
+        data = Subtask.objects.filter(id =subtask_id, todo = todo_id).first()
+        print(data)
+        record = json.loads(request.data)
+        if data and data == None:
+            return jsonify({"msg": "No subtask found"})
+        else:
+            data.modify(taskName=record["taskname"], completed=record["completed"])
+            return jsonify({"msg": "subtask  updated"})
 @api.route("/user/register")
 class RegisterUser(Resource):
     def post(self):
@@ -77,7 +96,6 @@ class RegisterUser(Resource):
                 password=record["password"],
                 date=D.today()
             )
-
             user.save()
             return jsonify({"msg": "User added sucessfully"})
         except ValueError:
@@ -88,11 +106,11 @@ class LoginUser(Resource):
     def post(self):
         record = json.loads(request.data)
         try:
-            user = User.objects(email = record["email"]).first()
+            user = User.objects(email=record["email"]).first()
             print(user.password)
             if record["password"] == user.password and record["email"] == user.email:
-                return jsonify({"msg" : "User logged in sucessfully"})
+                return jsonify({"msg": "User logged in sucessfully"})
             else:
                 return jsonify({"msg": "No Such user found"})
         except ValueError:
-            return jsonify({"msg" : "error"})
+            return jsonify({"msg": "error"})
