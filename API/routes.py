@@ -2,7 +2,7 @@ import json
 from datetime import date as D
 from flask import jsonify, request
 from flask_restx import Resource
-from API import api
+from API import api, bcrypt
 from API.models import User, Todo, Subtask
 
 
@@ -15,6 +15,7 @@ class GetAll(Resource):
         else:
             return jsonify({"msg": "Data not Found"})
         return jsonify({"msg": "Error while fetching the data."}, 404)
+
 
 @api.route("/<string:user_id>/todo/add")
 class AddTodoData(Resource):
@@ -32,6 +33,8 @@ class AddTodoData(Resource):
             return jsonify({"msg": "data added"})
         except ValueError:
             return jsonify({"msg": "error"})
+
+
 @api.route("/<string:todo_id>/subtask/add")
 class AddSubtaskData(Resource):
     def post(self, todo_id: str):
@@ -49,6 +52,7 @@ class AddSubtaskData(Resource):
         except ValueError:
             return jsonify({"msg": "error"})
 
+
 @api.route("/<string:user_id>/todo/delete")
 class DeleteData(Resource):
     def delete(self, user_id: str):
@@ -63,7 +67,7 @@ class DeleteData(Resource):
 @api.route("/<string:user_id>/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):
     def put(self, user_id: str, todo_id: str):
-        data = Todo.objects.filter(id =todo_id, user = user_id).first()
+        data = Todo.objects.filter(id=todo_id, user=user_id).first()
         print(data)
         record = json.loads(request.data)
         if data and data == None:
@@ -72,27 +76,33 @@ class UpdateTodoData(Resource):
             data.modify(title=record["title"], theme=record["theme"])
             return jsonify({"msg": "todo updated"})
 
+
 @api.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
 class UpdateSubtaskData(Resource):
     def put(self, todo_id: str, subtask_id: str):
-        data = Subtask.objects.filter(id =subtask_id, todo = todo_id).first()
+        data = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
         print(data)
         record = json.loads(request.data)
         if data and data == None:
             return jsonify({"msg": "No subtask found"})
         else:
-            data.modify(taskName=record["taskname"], completed=record["completed"])
+            data.modify(taskName=record["taskname"],
+                        completed=record["completed"])
             return jsonify({"msg": "subtask  updated"})
+
+
 @api.route("/user/register")
 class RegisterUser(Resource):
     def post(self):
         record = json.loads(request.data)
         try:
+            hashed_password = bcrypt.generate_password_hash(
+                record["password"]).decode('utf-8')
             user = User(
                 name=record["name"],
                 nickname=record["nickname"],
                 email=record["email"],
-                password=record["password"],
+                password=hashed_password,
                 date=D.today()
             )
             user.save()
@@ -100,14 +110,14 @@ class RegisterUser(Resource):
         except ValueError:
             return jsonify({"msg": "Failed adding user"})
 
+
 @api.route("/user/login")
 class LoginUser(Resource):
     def post(self):
         record = json.loads(request.data)
         try:
             user = User.objects(email=record["email"]).first()
-            print(user.password)
-            if record["password"] == user.password and record["email"] == user.email:
+            if user and bcrypt.check_password_hash(user.password, record["password"]):
                 return jsonify({"msg": "User logged in sucessfully"})
             else:
                 return jsonify({"msg": "No Such user found"})
