@@ -82,3 +82,17 @@ class RegisterUser(Resource):
             return jsonify({"msg": "User added sucessfully"})
         except ValueError:
             return jsonify({"msg": "Failed adding user"})
+
+@api.route("/user/login")
+class LoginUser(Resource):
+    def post(self):
+        record = json.loads(request.data)
+        try:
+            user = User.objects(email = record["email"]).first()
+            print(user.password)
+            if record["password"] == user.password and record["email"] == user.email:
+                return jsonify({"msg" : "User logged in sucessfully"})
+            else:
+                return jsonify({"msg": "No Such user found"})
+        except ValueError:
+            return jsonify({"msg" : "error"})
