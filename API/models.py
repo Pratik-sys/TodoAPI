@@ -1,5 +1,4 @@
 from API import db
-from bson.objectid import ObjectId
 
 
 class User(db.Document):
