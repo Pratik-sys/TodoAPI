@@ -4,13 +4,15 @@ from flask import jsonify, request
 from flask_restx import Resource
 from API import api, bcrypt
 from API.models import User, Todo, Subtask
+from flask_login import login_user, current_user, logout_user, login_required
 
 
 @api.route("/<string:user_id>/todos")
 class GetAll(Resource):
+    @login_required
     def get(self, user_id: str):
-        data = User.objects.get_or_404(id=user_id)
-        if data != None:
+        data = Todo.objects(user=user_id).first()        
+        if data is not None:
             return jsonify(data)
         else:
             return jsonify({"msg": "Data not Found"})
@@ -19,6 +21,7 @@ class GetAll(Resource):
 
 @api.route("/<string:user_id>/todo/add")
 class AddTodoData(Resource):
+    @login_required
     def post(self, user_id: str):
         record = json.loads(request.data)
         try:
@@ -55,20 +58,22 @@ class AddSubtaskData(Resource):
 
 @api.route("/<string:user_id>/todo/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
-    def delete(self, user_id: str, todo_id:str):
+    def delete(self, user_id: str, todo_id: str):
         data = Todo.objects.filter(id=todo_id, user=user_id).first()
         data.delete()
         return jsonify({"msg": "deleted"})
 
+
 @api.route("/<string:subtask_id>/subtask/delete")
 class DeleteSubtaskData(Resource):
-    def delete(self, subtask_id:str):
+    def delete(self, subtask_id: str):
         data = Subtask.objects.get_or_404(id=subtask_id)
         if data != None:
             data.delete()
-            return jsonify({"msg" : "Subtask deleted"})
+            return jsonify({"msg": "Subtask deleted"})
         else:
-            return jsonify({"msg" : "Error, no such subtask found in database"})
+            return jsonify({"msg": "Error, no such subtask found in database"})
+
 
 @api.route("/<string:user_id>/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):
@@ -124,6 +129,7 @@ class LoginUser(Resource):
         try:
             user = User.objects(email=record["email"]).first()
             if user and bcrypt.check_password_hash(user.password, record["password"]):
+                login_user(user)
                 return jsonify({"msg": "User logged in sucessfully"})
             else:
                 return jsonify({"msg": "No Such user found"})
