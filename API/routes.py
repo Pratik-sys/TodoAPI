@@ -118,7 +118,10 @@ class RegisterUser(Resource):
                 password=hashed_password,
                 date=D.today()
             )
-            user.save()
+            if User.objects.filter(email = user.email).values_list('email'):
+                return jsonify({"msg" : "email already in use"})
+            else:
+                user.save()
             return jsonify({"msg": "User added sucessfully"})
         except ValueError:
             return jsonify({"msg": "Failed adding user"})
