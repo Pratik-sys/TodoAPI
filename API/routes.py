@@ -4,13 +4,15 @@ from flask import jsonify, request
 from flask_restx import Resource
 from API import api, bcrypt
 from API.models import User, Todo, Subtask
+from flask_jwt_extended import jwt_required, create_access_token,get_jwt_identity
 
 
 @api.route("/<string:user_id>/todos")
 class GetAll(Resource):
+    @jwt_required()
     def get(self, user_id: str):
-        data = User.objects.get_or_404(id=user_id)
-        if data != None:
+        data = Todo.objects(user=user_id).first()
+        if data is not None:
             return jsonify(data)
         else:
             return jsonify({"msg": "Data not Found"})
@@ -19,6 +21,7 @@ class GetAll(Resource):
 
 @api.route("/<string:user_id>/todo/add")
 class AddTodoData(Resource):
+    @jwt_required()
     def post(self, user_id: str):
         record = json.loads(request.data)
         try:
@@ -37,6 +40,7 @@ class AddTodoData(Resource):
 
 @api.route("/<string:todo_id>/subtask/add")
 class AddSubtaskData(Resource):
+    @jwt_required()
     def post(self, todo_id: str):
         record = json.loads(request.data)
         try:
@@ -55,6 +59,7 @@ class AddSubtaskData(Resource):
 
 @api.route("/<string:user_id>/todo/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
+    @jwt_required()
     def delete(self, user_id: str, todo_id:str):
         data = Todo.objects.filter(id=todo_id, user=user_id).first()
         data.delete()
@@ -62,6 +67,7 @@ class DeleteTodoData(Resource):
 
 @api.route("/<string:subtask_id>/subtask/delete")
 class DeleteSubtaskData(Resource):
+    @jwt_required
     def delete(self, subtask_id:str):
         data = Subtask.objects.get_or_404(id=subtask_id)
         if data != None:
@@ -85,6 +91,7 @@ class UpdateTodoData(Resource):
 
 @api.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
 class UpdateSubtaskData(Resource):
+    @jwt_required()
     def put(self, todo_id: str, subtask_id: str):
         data = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
         print(data)
@@ -123,8 +130,10 @@ class LoginUser(Resource):
         record = json.loads(request.data)
         try:
             user = User.objects(email=record["email"]).first()
-            if user and bcrypt.check_password_hash(user.password, record["password"]):
-                return jsonify({"msg": "User logged in sucessfully"})
+            if user.email and bcrypt.check_password_hash(user.password, record["password"]):
+                gen_token = create_access_token(identity=user.email)
+                return jsonify({"Token": gen_token,
+                                "Msg": "User logged in sucessfully"},200)
             else:
                 return jsonify({"msg": "No Such user found"})
         except ValueError:
