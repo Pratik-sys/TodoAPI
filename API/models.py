@@ -1,5 +1,9 @@
-from API import db
+from API import db,jwt
 
+
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user
 
 class User(db.Document):
     name = db.StringField()

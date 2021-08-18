@@ -2,16 +2,22 @@ import json
 from datetime import date as D
 from flask import jsonify, request
 from flask_restx import Resource
-from API import api, bcrypt
+from API import api, bcrypt,jwt
 from API.models import User, Todo, Subtask
-from flask_jwt_extended import jwt_required, create_access_token,get_jwt_identity
+from flask_jwt_extended import jwt_required, create_access_token,get_jwt_identity, current_user
 
 
-@api.route("/<string:user_id>/todos")
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return User.objects(email=identity).first()
+
+
+@api.route("/todos")
 class GetAll(Resource):
     @jwt_required()
-    def get(self, user_id: str):
-        data = Todo.objects(user=user_id).first()
+    def get(self):
+        data = Todo.objects(user=current_user.id)
         if data is not None:
             return jsonify(data)
         else:
@@ -19,13 +25,13 @@ class GetAll(Resource):
         return jsonify({"msg": "Error while fetching the data."}, 404)
 
 
-@api.route("/<string:user_id>/todo/add")
+@api.route("/todo/add")
 class AddTodoData(Resource):
     @jwt_required()
-    def post(self, user_id: str):
+    def post(self):
         record = json.loads(request.data)
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=current_user.id)
             todo = Todo(
                 user=user,
                 title=record["title"],
@@ -57,11 +63,11 @@ class AddSubtaskData(Resource):
             return jsonify({"msg": "error"})
 
 
-@api.route("/<string:user_id>/todo/<string:todo_id>/delete")
+@api.route("/todo/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
     @jwt_required()
-    def delete(self, user_id: str, todo_id:str):
-        data = Todo.objects.filter(id=todo_id, user=user_id).first()
+    def delete(self, todo_id:str):
+        data = Todo.objects.filter(id=todo_id, user=current_user.id).first()
         data.delete()
         return jsonify({"msg": "deleted"})
 
@@ -76,10 +82,10 @@ class DeleteSubtaskData(Resource):
         else:
             return jsonify({"msg" : "Error, no such subtask found in database"})
 
-@api.route("/<string:user_id>/todo/<string:todo_id>/update")
+@api.route("/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):
-    def put(self, user_id: str, todo_id: str):
-        data = Todo.objects.filter(id=todo_id, user=user_id).first()
+    def put(self, todo_id: str):
+        data = Todo.objects.filter(id=todo_id, user=current_user.id).first()
         print(data)
         record = json.loads(request.data)
         if data and data == None:
@@ -135,9 +141,9 @@ class LoginUser(Resource):
             user = User.objects(email=record["email"]).first()
             if user.email and bcrypt.check_password_hash(user.password, record["password"]):
                 gen_token = create_access_token(identity=user.email)
-                return jsonify({"Token": gen_token,
-                                "Msg": "User logged in sucessfully"},200)
+                return jsonify({"access_token":gen_token})
             else:
                 return jsonify({"msg": "No Such user found"})
         except ValueError:
             return jsonify({"msg": "error"})
+
