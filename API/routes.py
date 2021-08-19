@@ -15,7 +15,7 @@ def user_lookup_callback(_jwt_header, jwt_data):
 
 
 @api.route("/todos")
-class GetAll(Resource):
+class ListAllTodos(Resource):
     @jwt_required()
     def get(self):
         data = Todo.objects(user=current_user.id)
@@ -24,7 +24,16 @@ class GetAll(Resource):
         else:
             return jsonify({"msg": "Data not Found"})
         return jsonify({"msg": "Error while fetching the data."}, 404)
-
+@api.route("/<string:todo_id>/subtask")
+class ListAllSubtasks(Resource):
+    @jwt_required()
+    def get(self, todo_id:str):
+        data = Subtask.objects(todo=todo_id)
+        if data is not None:
+            return jsonify(data)
+        else:
+            return jsonify({"msg": "Data not Found"})
+        return jsonify({"msg": "Error while fetching the data."}, 404)
 
 @api.route("/todo/add")
 class AddTodoData(Resource):
