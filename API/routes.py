@@ -18,22 +18,25 @@ def user_lookup_callback(_jwt_header, jwt_data):
 class ListAllTodos(Resource):
     @jwt_required()
     def get(self):
-        data = Todo.objects(user=current_user.id)
-        if data is not None:
-            return jsonify(data)
+        todo = Todo.objects(user=current_user.id)
+        if todo is not None:
+            return jsonify(todo, 200)
         else:
-            return jsonify({"msg": "Data not Found"})
-        return jsonify({"msg": "Error while fetching the data."}, 404)
+            return jsonify({"Msg": "No todo availabe for this user"}, 204)
+        return jsonify({"Msg": "Error while fetching the Todo's, Please try again"}, 404)
+
+
 @api.route("/<string:todo_id>/subtask")
 class ListAllSubtasks(Resource):
     @jwt_required()
-    def get(self, todo_id:str):
-        data = Subtask.objects(todo=todo_id)
-        if data is not None:
-            return jsonify(data)
+    def get(self, todo_id: str):
+        subtask = Subtask.objects(todo=todo_id)
+        if subtask is not None:
+            return jsonify(subtask)
         else:
-            return jsonify({"msg": "Data not Found"})
-        return jsonify({"msg": "Error while fetching the data."}, 404)
+            return jsonify({"Msg": "No Subtask available for this user"}, 200)
+        return jsonify({"Msg": "Error while fetching the Subtask's"}, 404)
+
 
 @api.route("/todo/add")
 class AddTodoData(Resource):
@@ -49,9 +52,9 @@ class AddTodoData(Resource):
                 date=D.today()
             )
             todo.save()
-            return jsonify({"msg": "data added"})
+            return jsonify({"Msg": "Todo Added Successfully"}, 201)
         except ValueError:
-            return jsonify({"msg": "error"})
+            return jsonify({"Msg": "Error while adding todo to DB"}, 500)
 
 
 @api.route("/<string:todo_id>/subtask/add")
@@ -68,59 +71,60 @@ class AddSubtaskData(Resource):
                 date=D.today()
             )
             subtask.save()
-            return jsonify({"msg": "data added"})
+            return jsonify({"Msg": "Subtask Added Successfully"}, 201)
         except ValueError:
-            return jsonify({"msg": "error"})
+            return jsonify({"Msg": "Error while addin subtask to DB"}, 500)
 
 
 @api.route("/todo/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
     @jwt_required()
     def delete(self, todo_id: str):
-        data = Todo.objects.filter(id=todo_id, user=current_user.id).first()
-        data.delete()
-        return jsonify({"msg": "deleted"})
+        todo = Todo.objects.filter(id=todo_id, user=current_user.id).first()
+        if todo is not None:
+            todo.delete()
+            return jsonify({"Msg": "Todo deleted successfully"}, 202)
+        else:
+            return jsonify({"Msg": "No Todo to delete"}, 410)
 
 
 @api.route("/<string:subtask_id>/subtask/delete")
 class DeleteSubtaskData(Resource):
     @jwt_required
     def delete(self, subtask_id: str):
-        data = Subtask.objects.get_or_404(id=subtask_id)
-        if data != None:
-            data.delete()
-            return jsonify({"msg": "Subtask deleted"})
+        subtask = Subtask.objects.get_or_404(id=subtask_id)
+        if subtask is not None:
+            subtask.delete()
+            return jsonify({"Msg": "Subtask deleted Successfully"}, 202)
         else:
-            return jsonify({"msg": "Error, no such subtask found in database"})
+            return jsonify({"Msg": "No Subtask to delete"}, 410)
 
 
 @api.route("/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):
     def put(self, todo_id: str):
-        data = Todo.objects.filter(id=todo_id, user=current_user.id).first()
-        print(data)
+        todo = Todo.objects.filter(id=todo_id, user=current_user.id).first()
         record = json.loads(request.data)
-        if data and data == None:
-            return jsonify({"msg": "No todo found"})
-        else:
-            data.modify(title=bleach.clean(record["title"]),
+        if todo is not None:
+            todo.modify(title=bleach.clean(record["title"]),
                         theme=bleach.clean(record["theme"]))
-            return jsonify({"msg": "todo updated"})
+            return jsonify({"Msg": "Todo updated successfully"}, 200)
+        else:
+            return jsonify({"Msg": "Error while updating todo"}, 404)
 
 
 @api.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
 class UpdateSubtaskData(Resource):
     @jwt_required()
     def put(self, todo_id: str, subtask_id: str):
-        data = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
-        print(data)
+        subtask = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
         record = json.loads(request.data)
-        if data and data == None:
-            return jsonify({"msg": "No subtask found"})
+        if subtask is not None:
+            subtask.modify(taskName=bleach.clean(record["taskname"]),
+                           completed=record["completed"])
+            return jsonify({"Msg": "Subtak updated successfully"}, 200)
         else:
-            data.modify(taskName=bleach.clean(record["taskname"]),
-                        completed=record["completed"])
-            return jsonify({"msg": "subtask  updated"})
+            return jsonify({"Msg": "Error while updating subtask"}, 404)
 
 
 @api.route("/user/register")
@@ -133,17 +137,17 @@ class RegisterUser(Resource):
             user = User(
                 name=bleach.clean(record["name"]),
                 nickname=bleach.clean(record["nickname"]),
-                email=bleach.clear(record["email"]),
+                email=record["email"],
                 password=hashed_password,
                 date=D.today()
             )
             if User.objects.filter(email=user.email).values_list('email'):
-                return jsonify({"msg": "email already in use"})
+                return jsonify({"Msg": "email already in use"}, 406)
             else:
                 user.save()
-            return jsonify({"msg": "User added sucessfully"})
+            return jsonify({"Msg": "User added sucessfully"}, 200)
         except ValueError:
-            return jsonify({"msg": "Failed adding user"})
+            return jsonify({"Msg": "Error while adding user to the database"}, 500)
 
 
 @api.route("/user/login")
@@ -154,8 +158,8 @@ class LoginUser(Resource):
             user = User.objects(email=record["email"]).first()
             if user.email and bcrypt.check_password_hash(user.password, record["password"]):
                 gen_token = create_access_token(identity=user.email)
-                return jsonify({"access_token": gen_token})
+                return jsonify({"Access_Token": gen_token}, 200)
             else:
-                return jsonify({"msg": "No Such user found"})
+                return jsonify({"Msg": "There was error while generating token"}, 288)
         except ValueError:
-            return jsonify({"msg": "error"})
+            return jsonify({"Msg": "Error while login the user"}, 500)
