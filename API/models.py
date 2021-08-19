@@ -1,4 +1,5 @@
 from API import db,jwt
+import datetime
 
 
 @jwt.user_identity_loader
@@ -6,11 +7,11 @@ def user_identity_lookup(user):
     return user
 
 class User(db.Document):
-    name = db.StringField()
-    nickname = db.StringField()
-    email = db.StringField()
-    password = db.StringField()
-    date = db.DateTimeField()
+    name = db.StringField(required=True)
+    nickname = db.StringField(required=True,min_length=3, max_length=10)
+    email = db.StringField(required=True, unique=True)
+    password = db.StringField(required=True, min_length=8,max_length=18)
+    date = db.DateTimeField(default=datetime.datetime.utcnow)
 
 
 class Todo(db.Document):
