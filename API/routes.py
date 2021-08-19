@@ -1,10 +1,11 @@
 import json
+import bleach
 from datetime import date as D
 from flask import jsonify, request
 from flask_restx import Resource
-from API import api, bcrypt,jwt
+from API import api, bcrypt, jwt
 from API.models import User, Todo, Subtask
-from flask_jwt_extended import jwt_required, create_access_token,get_jwt_identity, current_user
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, current_user
 
 
 @jwt.user_lookup_loader
@@ -34,8 +35,8 @@ class AddTodoData(Resource):
             user = User.objects.get(id=current_user.id)
             todo = Todo(
                 user=user,
-                title=record["title"],
-                theme=record["theme"],
+                title=bleach.clean(record["title"]),
+                theme=bleach.clean(record["theme"]),
                 date=D.today()
             )
             todo.save()
@@ -53,7 +54,7 @@ class AddSubtaskData(Resource):
             todo = Todo.objects.get(id=todo_id)
             subtask = Subtask(
                 todo=todo,
-                taskName=record["taskname"],
+                taskName=bleach.clean(record["taskname"]),
                 completed=record["completed"],
                 date=D.today()
             )
@@ -66,21 +67,23 @@ class AddSubtaskData(Resource):
 @api.route("/todo/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
     @jwt_required()
-    def delete(self, todo_id:str):
+    def delete(self, todo_id: str):
         data = Todo.objects.filter(id=todo_id, user=current_user.id).first()
         data.delete()
         return jsonify({"msg": "deleted"})
 
+
 @api.route("/<string:subtask_id>/subtask/delete")
 class DeleteSubtaskData(Resource):
     @jwt_required
-    def delete(self, subtask_id:str):
+    def delete(self, subtask_id: str):
         data = Subtask.objects.get_or_404(id=subtask_id)
         if data != None:
             data.delete()
-            return jsonify({"msg" : "Subtask deleted"})
+            return jsonify({"msg": "Subtask deleted"})
         else:
-            return jsonify({"msg" : "Error, no such subtask found in database"})
+            return jsonify({"msg": "Error, no such subtask found in database"})
+
 
 @api.route("/todo/<string:todo_id>/update")
 class UpdateTodoData(Resource):
@@ -91,7 +94,8 @@ class UpdateTodoData(Resource):
         if data and data == None:
             return jsonify({"msg": "No todo found"})
         else:
-            data.modify(title=record["title"], theme=record["theme"])
+            data.modify(title=bleach.clean(record["title"]),
+                        theme=bleach.clean(record["theme"]))
             return jsonify({"msg": "todo updated"})
 
 
@@ -105,7 +109,7 @@ class UpdateSubtaskData(Resource):
         if data and data == None:
             return jsonify({"msg": "No subtask found"})
         else:
-            data.modify(taskName=record["taskname"],
+            data.modify(taskName=bleach.clean(record["taskname"]),
                         completed=record["completed"])
             return jsonify({"msg": "subtask  updated"})
 
@@ -116,16 +120,16 @@ class RegisterUser(Resource):
         record = json.loads(request.data)
         try:
             hashed_password = bcrypt.generate_password_hash(
-                record["password"]).decode('utf-8')
+                bleach.clean(record["password"])).decode('utf-8')
             user = User(
-                name=record["name"],
-                nickname=record["nickname"],
-                email=record["email"],
+                name=bleach.clean(record["name"]),
+                nickname=bleach.clean(record["nickname"]),
+                email=bleach.clear(record["email"]),
                 password=hashed_password,
                 date=D.today()
             )
-            if User.objects.filter(email = user.email).values_list('email'):
-                return jsonify({"msg" : "email already in use"})
+            if User.objects.filter(email=user.email).values_list('email'):
+                return jsonify({"msg": "email already in use"})
             else:
                 user.save()
             return jsonify({"msg": "User added sucessfully"})
@@ -141,9 +145,8 @@ class LoginUser(Resource):
             user = User.objects(email=record["email"]).first()
             if user.email and bcrypt.check_password_hash(user.password, record["password"]):
                 gen_token = create_access_token(identity=user.email)
-                return jsonify({"access_token":gen_token})
+                return jsonify({"access_token": gen_token})
             else:
                 return jsonify({"msg": "No Such user found"})
         except ValueError:
             return jsonify({"msg": "error"})
-
