@@ -1,6 +1,5 @@
 import json
 import bleach
-from datetime import date as D
 from flask import jsonify, request
 from flask_restx import Resource
 from API import api, bcrypt, jwt
@@ -48,8 +47,7 @@ class AddTodoData(Resource):
             todo = Todo(
                 user=user,
                 title=bleach.clean(record["title"]),
-                theme=bleach.clean(record["theme"]),
-                date=D.today()
+                theme=bleach.clean(record["theme"])
             )
             todo.save()
             return jsonify({"Msg": "Todo Added Successfully"}, 201)
@@ -67,8 +65,7 @@ class AddSubtaskData(Resource):
             subtask = Subtask(
                 todo=todo,
                 taskName=bleach.clean(record["taskname"]),
-                completed=record["completed"],
-                date=D.today()
+                completed=record["completed"]
             )
             subtask.save()
             return jsonify({"Msg": "Subtask Added Successfully"}, 201)
@@ -138,8 +135,7 @@ class RegisterUser(Resource):
                 name=bleach.clean(record["name"]),
                 nickname=bleach.clean(record["nickname"]),
                 email=record["email"],
-                password=hashed_password,
-                date=D.today()
+                password=hashed_password
             )
             if User.objects.filter(email=user.email).values_list('email'):
                 return jsonify({"Msg": "email already in use"}, 406)
