@@ -1,5 +1,5 @@
 from API import db,jwt
-import datetime
+from datetime import datetime
 
 
 @jwt.user_identity_loader
@@ -11,18 +11,18 @@ class User(db.Document):
     nickname = db.StringField(required=True,min_length=3, max_length=10)
     email = db.StringField(required=True, unique=True)
     password = db.StringField(required=True, min_length=8,max_length=18)
-    date = db.DateTimeField(default=datetime.datetime.utcnow)
+    date = db.DateTimeField(default=datetime.utcnow().strftime("%H:%M:%S %b %d %Y"))
 
 
 class Todo(db.Document):
     user = db.ReferenceField(User)
     title = db.StringField()
     theme = db.StringField()
-    date = db.DateTimeField()
+    date = db.DateTimeField(default=datetime.utcnow().strftime("%H:%M:%S %b %d %Y"))
 
 
 class Subtask(db.Document):
     todo = db.ReferenceField(Todo, reverse_delete_rule=db.CASCADE)
     taskName = db.StringField()
     completed = db.BooleanField(default = False)
-    date = db.DateTimeField()
+    date = db.DateTimeField(default=datetime.utcnow().strftime("%H:%M:%S %b %d %Y"))
