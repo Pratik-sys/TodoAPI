@@ -99,7 +99,7 @@ class DeleteTodoData(Resource):
             else:
                 return jsonify({"Msg": "No Todo to delete"}, 410)
         except Exception:
-            return jsonify({"Msg": "Db Error"}, 500})
+            return jsonify({"Msg": "Db Error"}, 500)
 
 
 @api.route("/<string:subtask_id>/subtask/delete")
