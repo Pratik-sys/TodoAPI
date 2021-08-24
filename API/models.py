@@ -8,8 +8,8 @@ def user_identity_lookup(user):
 
 class User(db.Document):
     name = db.StringField(required=True)
-    nickname = db.StringField(required=True,min_length=3, max_length=10)
-    email = db.StringField(required=True, unique=True)
+    nickname = db.StringField(required=True)
+    email = db.StringField(required=True)
     password = db.StringField(required=True)
     date = db.DateTimeField(default=datetime.utcnow)
 
