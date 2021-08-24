@@ -1,30 +1,30 @@
 from flask import Flask
 from flask_restx import Api
 from flask_mongoengine import MongoEngine
-from dotenv import load_dotenv
-import os
-import random, string
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from API.config import Config
 
 
-app = Flask(__name__)
-api = Api(app)
-load_dotenv(".env")
-app.config["MONGODB_SETTINGS"] = {"host": os.getenv("URI")}
-db = MongoEngine(app)
-app.config["SECRET_KEY"] = "".join(
-    random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
-    for _ in range(16)
-)
+api = Api()
+bcrypt = Bcrypt()
+jwt = JWTManager()
+db = MongoEngine()
 
-bcrypt = Bcrypt(app)
 
-app.config['JWT_SECRET_KEY'] = "".join(
-    random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
-    for _ in range(16)
-) 
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+    api.init_app(app)
 
-jwt = JWTManager(app)
+    from API.Subtasks.routes import _subtasks
+    from API.Todos.routes import _todos
+    from API.Users.routes import _users
+    app.register_blueprint(_subtasks)
+    app.register_blueprint(_todos)
+    app.register_blueprint(_users)
 
-from API import routes
+    return app
