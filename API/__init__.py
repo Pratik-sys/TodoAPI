@@ -6,7 +6,7 @@ from flask_jwt_extended import JWTManager
 from API.config import Config
 
 
-api = Api()
+api = Api(title="Todo", version="1.0")
 bcrypt = Bcrypt()
 jwt = JWTManager()
 db = MongoEngine()
