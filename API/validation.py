@@ -27,6 +27,6 @@ def validateUserDetails(user):
     errors = []
     if len(user.nickname) < 3:
         errors.append({"Nickname": "String value is too short, should be greatere than 3"})
-    elif User.objects.filter(email = user.email).values_list('email'):
+    if User.objects.filter(email = user.email).values_list('email'):
         errors.append({"Msg": "email already in use"})
     return errors
