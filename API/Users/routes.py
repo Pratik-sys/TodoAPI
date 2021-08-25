@@ -4,7 +4,7 @@ from flask import jsonify, request, Blueprint
 from flask_restx import Resource
 from API import bcrypt,Api
 from API.models import User, Todo, Subtask
-from API.validation import validateSubtask, validateTodo, validateTodoUpdate, validateSubtaskUpdate
+from API.validation import validateSubtask, validateTodo, validateTodoUpdate, validateSubtaskUpdate, validateUserDetails
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, current_user
 
 _users = Blueprint('users', __name__)
@@ -23,11 +23,12 @@ class RegisterUser(Resource):
                 email = record["email"],
                 password = hashed_password
             )
-            if User.objects.filter(email = user.email).values_list('email'):
-                return jsonify({"Msg": "email already in use"}, 406)
-            else:
+            errors = validateUserDetails(user)
+            if len(errors) == 0:
                 user.save()
-            return jsonify({"Msg": "User added sucessfully"}, 200)
+                return jsonify({"Msg": "User added sucessfully"}, 200)
+            else:
+                return jsonify(errors,404)
         except Exception as ex:
             print(ex)
             return jsonify({"Msg": "Error while adding user to the database"}, 500)
