@@ -1,8 +1,10 @@
 aniso8601==9.0.1
+appdirs==1.4.4
 astroid==2.6.6
 attrs==21.2.0
 autopep8==1.5.7
 bcrypt==3.2.0
+black==21.7b0
 bleach==4.0.0
 cffi==1.14.6
 click==8.0.1
@@ -24,7 +26,9 @@ lazy-object-proxy==1.6.0
 MarkupSafe==2.0.1
 mccabe==0.6.1
 mongoengine==0.23.1
+mypy-extensions==0.4.3
 packaging==21.0
+pathspec==0.9.0
 pycodestyle==2.7.0
 pycparser==2.20
 PyJWT==2.1.0
@@ -34,8 +38,10 @@ pyparsing==2.4.7
 pyrsistent==0.18.0
 python-dotenv==0.19.0
 pytz==2021.1
+regex==2021.8.21
 six==1.16.0
 toml==0.10.2
+tomli==1.2.1
 webencodings==0.5.1
 Werkzeug==2.0.1
 wrapt==1.12.1

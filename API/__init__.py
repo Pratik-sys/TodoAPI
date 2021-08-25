@@ -23,6 +23,7 @@ def create_app(config_class=Config):
     from API.Subtasks.routes import _subtasks
     from API.Todos.routes import _todos
     from API.Users.routes import _users
+
     app.register_blueprint(_subtasks)
     app.register_blueprint(_todos)
     app.register_blueprint(_users)

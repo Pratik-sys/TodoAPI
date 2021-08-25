@@ -4,16 +4,28 @@ from flask import jsonify, request, Blueprint
 from flask_restx import Resource
 from API import bcrypt, jwt, Api
 from API.models import User, Todo, Subtask
-from API.validation import validateSubtask, validateTodo, validateTodoUpdate, validateSubtaskUpdate
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, current_user
+from API.validation import (
+    validateSubtask,
+    validateTodo,
+    validateTodoUpdate,
+    validateSubtaskUpdate,
+)
+from flask_jwt_extended import (
+    jwt_required,
+    create_access_token,
+    get_jwt_identity,
+    current_user,
+)
 
-_subtasks = Blueprint('subtasks', __name__)
+_subtasks = Blueprint("subtasks", __name__)
 subtasks = Api(_subtasks)
+
 
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
     return User.objects(email=identity).first()
+
 
 @subtasks.route("/<string:todo_id>/subtask")
 class ListAllSubtasks(Resource):
@@ -28,6 +40,7 @@ class ListAllSubtasks(Resource):
         except Exception:
             return jsonify({"Msg": "Error while fetching the Subtask's"}, 404)
 
+
 @subtasks.route("/<string:todo_id>/subtask/add")
 class AddSubtaskData(Resource):
     @jwt_required()
@@ -38,7 +51,7 @@ class AddSubtaskData(Resource):
             subtask = Subtask(
                 todo=todo,
                 taskName=bleach.clean(record["taskname"]),
-                completed=record["completed"]
+                completed=record["completed"],
             )
             errors = validateSubtask(subtask)
             if len(errors) == 0:
@@ -49,23 +62,26 @@ class AddSubtaskData(Resource):
         except Exception:
             return jsonify({"Msg": "DB Error"}, 500)
 
+
 @subtasks.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
 class UpdateSubtaskData(Resource):
     @jwt_required()
     def put(self, todo_id: str, subtask_id: str):
         try:
-            subtask=Subtask.objects.filter(
-                id = subtask_id, todo = todo_id).first()
-            record=json.loads(request.data)
-            errors=validateSubtaskUpdate(record)
+            subtask = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
+            record = json.loads(request.data)
+            errors = validateSubtaskUpdate(record)
             if len(errors) == 0:
-                subtask.modify(taskName = bleach.clean(record["taskname"]),
-                               completed = record["completed"])
+                subtask.modify(
+                    taskName=bleach.clean(record["taskname"]),
+                    completed=record["completed"],
+                )
                 return jsonify({"Msg": "Subtak updated successfully"}, 200)
             else:
                 return jsonify(errors, 204)
         except Exception:
             return jsonify({"Msg": "DB Error"}, 500)
+
 
 @subtasks.route("/<string:subtask_id>/subtask/delete")
 class DeleteSubtaskData(Resource):

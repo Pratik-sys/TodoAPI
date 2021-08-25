@@ -1,10 +1,11 @@
-from API import db,jwt
+from API import db, jwt
 from datetime import datetime
 
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):
     return user
+
 
 class User(db.Document):
     name = db.StringField(required=True)
@@ -24,5 +25,5 @@ class Todo(db.Document):
 class Subtask(db.Document):
     todo = db.ReferenceField(Todo, reverse_delete_rule=db.CASCADE)
     taskName = db.StringField()
-    completed = db.BooleanField(default = False)
+    completed = db.BooleanField(default=False)
     date = db.DateTimeField(default=datetime.utcnow)
