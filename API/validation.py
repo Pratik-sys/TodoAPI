@@ -1,4 +1,5 @@
 from API.models import User
+import re
 
 
 def validateSubtask(subtask):
@@ -31,10 +32,16 @@ def validateSubtaskUpdate(record):
 
 def validateUserDetails(user):
     errors = []
+    regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
     if len(user.nickname) < 3:
         errors.append(
             {"Nickname": "String value is too short, should be greatere than 3"}
         )
     if User.objects.filter(email=user.email).values_list("email"):
         errors.append({"Msg": "email already in use"})
+
+    if re.fullmatch(regex, user.email):
+        pass
+    else:
+        errors.append({"Email": "Inavalid Email"})
     return errors
