@@ -19,6 +19,12 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     jwt.init_app(app)
     api.init_app(app)
+    from API.models import User
+
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        identity = jwt_data["sub"]
+        return User.objects(email=identity).first()
 
     from API.Subtasks.routes import _subtasks
     from API.Todos.routes import _todos
