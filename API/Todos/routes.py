@@ -32,7 +32,6 @@ class ListAllTodos(Resource):
             else:
                 return jsonify({"Msg": "No todo availabe for this user"}, 204)
         except Exception as ex:
-            print(ex)
             return jsonify(
                 {"Msg": "Error while fetching the Todo's, Please try again"}, 404
             )

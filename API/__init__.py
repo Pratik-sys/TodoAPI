@@ -4,6 +4,7 @@ from flask_mongoengine import MongoEngine
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from API.config import Config
+from flask_cors import CORS
 
 
 api = Api(title="Todo", version="1.0")
@@ -19,6 +20,7 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     jwt.init_app(app)
     api.init_app(app)
+    CORS(app)
     from API.models import User
 
     @jwt.user_lookup_loader

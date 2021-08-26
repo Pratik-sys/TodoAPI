@@ -43,7 +43,6 @@ class RegisterUser(Resource):
             else:
                 return jsonify(errors, 404)
         except Exception as ex:
-            print(ex)
             return jsonify({"Msg": "Error while adding user to the database"}, 500)
 
 
@@ -53,7 +52,6 @@ class LoginUser(Resource):
         record = json.loads(request.data)
         try:
             user = User.objects(email=record["email"]).first()
-            print(user)
             if user.email and bcrypt.check_password_hash(
                 user.password, record["password"]
             ):
