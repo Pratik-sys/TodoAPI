@@ -1,10 +1,10 @@
 # TODO API
 
-- Todo Api is implemented with [Flask](https://flask.palletsprojects.com/en/2.0.x/) Framework and  [Flask Rest-x](https://flask-restx.readthedocs.io/en/latest/index.html) for quickl building  Resful Apis.
+- Todo Api is implemented with [Flask](https://flask.palletsprojects.com/en/2.0.x/) Framework and  [Flask Rest-x](https://flask-restx.readthedocs.io/en/latest/index.html) for quickly building  Resful Apis.
 
-- Api has Token based Authorization. [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/en/stable/) helps generating these tokes for the user to access the content.
+- Api has Token based Authorization, [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/en/stable/) helps generating these tokes for the user to access the content.
 
-## Technologies
+### Technologies
 ---
 - Flask
 - Flask Rest-x
@@ -29,4 +29,6 @@
 
 - you can test the Api in [Postman](https://www.postman.com/) for better visualization
 
-## view the deployment
+### View Deployment
+---
+> https://dynamic-todo-api.herokuapp.com/
