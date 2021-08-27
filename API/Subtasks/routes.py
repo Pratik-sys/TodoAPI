@@ -10,12 +10,7 @@ from API.validation import (
     validateTodoUpdate,
     validateSubtaskUpdate,
 )
-from flask_jwt_extended import (
-    jwt_required,
-    create_access_token,
-    get_jwt_identity,
-    current_user,
-)
+from flask_jwt_extended import jwt_required, create_access_token, current_user
 
 _subtasks = Blueprint("subtasks", __name__)
 subtasks = Api(_subtasks)
