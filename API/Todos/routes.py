@@ -1,8 +1,8 @@
 import json
 import bleach
 from flask import jsonify, request, Blueprint
-from flask_restx import Resource
-from API import bcrypt, jwt, Api
+from flask_restx import Resource, Namespace
+from API import jwt
 from API.models import User, Todo, Subtask
 from API.validation import (
     validateSubtask,
@@ -12,11 +12,10 @@ from API.validation import (
 )
 from flask_jwt_extended import jwt_required, create_access_token, current_user
 
-_todos = Blueprint("todos", __name__)
-todos = Api(_todos)
+todos = Namespace("todos")
 
 
-@todos.route("/todos")
+@todos.route("/getAll")
 class ListAllTodos(Resource):
     @jwt_required()
     def get(self):
@@ -32,7 +31,7 @@ class ListAllTodos(Resource):
             )
 
 
-@todos.route("/todo/add")
+@todos.route("/add")
 class AddTodoData(Resource):
     @jwt_required()
     def post(self):
@@ -54,7 +53,7 @@ class AddTodoData(Resource):
             return jsonify({"Msg": "DB Error"}, 500)
 
 
-@todos.route("/todo/<string:todo_id>/update")
+@todos.route("/<string:todo_id>/update")
 class UpdateTodoData(Resource):
     @jwt_required()
     def put(self, todo_id: str):
@@ -74,7 +73,7 @@ class UpdateTodoData(Resource):
             return jsonify({"Msg": "Db Error"}, 500)
 
 
-@todos.route("/todo/<string:todo_id>/delete")
+@todos.route("/<string:todo_id>/delete")
 class DeleteTodoData(Resource):
     @jwt_required()
     def delete(self, todo_id: str):

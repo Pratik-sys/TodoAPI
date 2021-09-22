@@ -1,8 +1,8 @@
 import json
 import bleach
 from flask import jsonify, request, Blueprint
-from flask_restx import Resource
-from API import bcrypt, jwt, Api
+from flask_restx import Resource, Namespace
+from API import jwt
 from API.models import User, Todo, Subtask
 from API.validation import (
     validateSubtask,
@@ -12,11 +12,10 @@ from API.validation import (
 )
 from flask_jwt_extended import jwt_required, create_access_token, current_user
 
-_subtasks = Blueprint("subtasks", __name__)
-subtasks = Api(_subtasks)
+subtasks = Namespace("subtask")
 
 
-@subtasks.route("/<string:todo_id>/subtask")
+@subtasks.route("/<string:todo_id>")
 class ListAllSubtasks(Resource):
     @jwt_required()
     def get(self, todo_id: str):
@@ -30,7 +29,7 @@ class ListAllSubtasks(Resource):
             return jsonify({"Msg": "Error while fetching the Subtask's"}, 404)
 
 
-@subtasks.route("/<string:todo_id>/subtask/add")
+@subtasks.route("/<string:todo_id>/add")
 class AddSubtaskData(Resource):
     @jwt_required()
     def post(self, todo_id: str):
@@ -72,7 +71,7 @@ class UpdateSubtaskData(Resource):
             return jsonify({"Msg": "DB Error"}, 500)
 
 
-@subtasks.route("/<string:subtask_id>/subtask/delete")
+@subtasks.route("/<string:subtask_id>/delete")
 class DeleteSubtaskData(Resource):
     @jwt_required()
     def delete(self, subtask_id: str):

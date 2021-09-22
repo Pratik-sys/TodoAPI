@@ -1,8 +1,8 @@
 import json
 import bleach
 from flask import jsonify, request, Blueprint
-from flask_restx import Resource
-from API import bcrypt, Api
+from flask_restx import Resource, Namespace
+from API import bcrypt
 from API.models import User, Todo, Subtask
 from API.validation import (
     validateSubtask,
@@ -13,11 +13,10 @@ from API.validation import (
 )
 from flask_jwt_extended import jwt_required, create_access_token, current_user
 
-_users = Blueprint("users", __name__)
-users = Api(_users)
+users = Namespace("users")
 
 
-@users.route("/user/register")
+@users.route("/register")
 class RegisterUser(Resource):
     def post(self):
         record = json.loads(request.data)
@@ -41,7 +40,7 @@ class RegisterUser(Resource):
             return jsonify({"Msg": "Error while adding user to the database"}, 500)
 
 
-@users.route("/user/login")
+@users.route("/login")
 class LoginUser(Resource):
     def post(self):
         record = json.loads(request.data)
