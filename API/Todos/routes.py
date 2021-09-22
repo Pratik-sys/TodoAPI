@@ -1,16 +1,13 @@
 import json
 import bleach
-from flask import jsonify, request, Blueprint
+from flask import jsonify, request
 from flask_restx import Resource, Namespace
-from API import jwt
-from API.models import User, Todo, Subtask
+from API.models import User, Todo
 from API.validation import (
-    validateSubtask,
     validateTodo,
     validateTodoUpdate,
-    validateSubtaskUpdate,
 )
-from flask_jwt_extended import jwt_required, create_access_token, current_user
+from flask_jwt_extended import jwt_required, current_user
 
 todos = Namespace("todos")
 
