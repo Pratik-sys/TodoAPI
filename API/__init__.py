@@ -25,7 +25,7 @@ def create_app(config_class=Config):
         identity = jwt_data["sub"]
         return User.objects(email=identity).first()
 
-    from .test import blueprint as api
+    from .register_namsapce import blueprint as api
 
     app.register_blueprint(api)
 
