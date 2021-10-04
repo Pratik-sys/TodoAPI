@@ -1,6 +1,7 @@
 import os
 import random, string
 from dotenv import load_dotenv
+from datetime import timedelta
 
 
 class Config:
@@ -14,3 +15,4 @@ class Config:
         random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
         for _ in range(16)
     )
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)

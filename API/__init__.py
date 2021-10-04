@@ -1,9 +1,16 @@
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import (
+    JWTManager,
+    get_jwt,
+    create_access_token,
+    get_jwt_identity,
+    set_access_cookies,
+)
 from API.config import Config
 from flask_cors import CORS
+from datetime import timedelta, timezone, datetime
 
 
 bcrypt = Bcrypt()
@@ -28,5 +35,18 @@ def create_app(config_class=Config):
     from .register_namsapce import blueprint as api
 
     app.register_blueprint(api)
+
+    @app.after_request
+    def refresh_expiring_jwts(response):
+        try:
+            exp_timestamp = get_jwt()["exp"]
+            now = datetime.now(timezone.utc)
+            target_timestamp = datetime.timestamp(now + timedelta(minutes=10))
+            if target_timestamp > exp_timestamp:
+                access_token = create_access_token(identity=get_jwt_identity())
+                set_access_cookies(response, access_token)
+            return response
+        except (RuntimeError, KeyError):
+            return response
 
     return app
