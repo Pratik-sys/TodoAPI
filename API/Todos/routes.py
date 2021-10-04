@@ -61,7 +61,7 @@ class UpdateTodoData(Resource):
             if len(errors) == 0:
                 todo.modify(
                     title=bleach.clean(record["title"]),
-                    theme=bleach.clean(record["theme"]),
+                    theme=todo.theme or bleach.clean(record["theme"]),
                 )
                 return jsonify({"Msg": "Todo updated successfully"}, 200)
             else:
