@@ -6,20 +6,20 @@ from API.models import Todo, Subtask
 from API.validation import validateSubtask, validateSubtaskUpdate
 from flask_jwt_extended import jwt_required
 
-subtasks = Namespace("subtask")
+subtasks = Namespace("subtasks")
 
 
-@subtasks.route("/<string:todo_id>")
+@subtasks.route("/<string:subtask_id>")
 class ListAllSubtasks(Resource):
     @jwt_required()
-    def get(self, todo_id: str):
+    def get(self, subtask_id: str):
         try:
-            subtask = Subtask.objects(todo=todo_id).all()
-            if len(subtask) > 0:
-                return jsonify(subtask)
+            todosub = Todo.objects(subtasks__subid=subtask_id).all()
+            if len(todosub.subtasks) > 0:
+                return jsonify(todosub.subtasks)
             else:
                 return jsonify({"Msg": "No Subtask available for this user"}, 200)
-        except Exception:
+        except Exception as ex:
             return jsonify({"Msg": "Error while fetching the Subtask's"}, 404)
 
 
@@ -28,40 +28,55 @@ class AddSubtaskData(Resource):
     @jwt_required()
     def post(self, todo_id: str):
         record = json.loads(request.data)
+        subarr = []
         try:
-            todo = Todo.objects.get(id=todo_id)
-            subtask = Subtask(
-                todo=todo,
-                taskName=bleach.clean(record["taskname"]),
-                completed=record["completed"],
-            )
-            errors = validateSubtask(subtask)
+            errors = validateSubtask(record)
             if len(errors) == 0:
-                subtask.save()
+                todosub = Todo.objects(id=todo_id).first()
+                if len(todosub.subtasks) == 0:
+                    subarr = [
+                        Subtask(
+                            taskName=bleach.clean(record["taskname"]),
+                            completed=record["completed"],
+                        )
+                    ]
+                else:
+                    subarr = todosub.subtasks
+                    subarr.append(
+                        Subtask(
+                            taskName=bleach.clean(record["taskname"]),
+                            completed=record["completed"],
+                        )
+                    )
+                todosub.subtasks = subarr
+                todosub.save()
                 return jsonify({"Msg": "Subtask Added Successfully"}, 201)
             else:
                 return jsonify(errors, 204)
-        except Exception:
+        except Exception as ex:
+            print(ex)
             return jsonify({"Msg": "DB Error"}, 500)
 
 
-@subtasks.route("/<string:todo_id>/subtask/<string:subtask_id>/update")
+@subtasks.route("/<string:subtask_id>/update")
 class UpdateSubtaskData(Resource):
     @jwt_required()
-    def put(self, todo_id: str, subtask_id: str):
+    def put(self, subtask_id: str):
+        record = json.loads(request.data)
         try:
-            subtask = Subtask.objects.filter(id=subtask_id, todo=todo_id).first()
-            record = json.loads(request.data)
             errors = validateSubtaskUpdate(record)
+            todosub = Todo.objects(subtasks__subid=subtask_id).first()
             if len(errors) == 0:
-                subtask.modify(
-                    taskName=bleach.clean(record["taskname"]),
-                    completed=record["completed"],
-                )
+                for i in todosub.subtasks:
+                    if str(i.subid) == subtask_id:
+                        i.taskName = bleach.clean(record["taskname"])
+                        i.completed = record["completed"]
+                todosub.save()
                 return jsonify({"Msg": "Subtak updated successfully"}, 200)
             else:
                 return jsonify(errors, 204)
-        except Exception:
+        except Exception as ex:
+            print(ex)
             return jsonify({"Msg": "DB Error"}, 500)
 
 
@@ -69,12 +84,14 @@ class UpdateSubtaskData(Resource):
 class DeleteSubtaskData(Resource):
     @jwt_required()
     def delete(self, subtask_id: str):
+        subarr = []
         try:
-            subtask = Subtask.objects.get_or_404(id=subtask_id)
-            if subtask is not None:
-                subtask.delete()
-                return jsonify({"Msg": "Subtask deleted Successfully"}, 202)
-            else:
-                return jsonify({"Msg": "No Subtask to delete"}, 410)
-        except Exception:
+            todosub = Todo.objects(subtasks__subid=subtask_id).first()
+            for i in todosub.subtasks:
+                if str(i.subid) != subtask_id:
+                    subarr.append(i)
+            todosub.subtasks = subarr
+            todosub.save()
+            return jsonify({"Msg": "Subtask deleted Successfully"}, 202)
+        except Exception as ex:
             return jsonify({"Msg": "Db Error"}, 500)
