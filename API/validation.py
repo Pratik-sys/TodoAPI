@@ -4,7 +4,7 @@ import re
 
 def validateSubtask(subtask):
     errors = []
-    if subtask.taskname == "":
+    if subtask["taskname"] == "":
         errors.append({"Taskname": "Taskname can't be empty"})
     return errors
 
