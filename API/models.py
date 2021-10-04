@@ -1,6 +1,7 @@
 from mongoengine.fields import ListField
 from API import db, jwt
 from datetime import datetime
+from bson import ObjectId
 
 
 @jwt.user_identity_loader
@@ -17,6 +18,7 @@ class User(db.Document):
 
 
 class Subtask(db.EmbeddedDocument):
+    subid = db.ObjectIdField(default=ObjectId)
     taskName = db.StringField()
     completed = db.BooleanField(default=False)
     date = db.DateTimeField(default=datetime.utcnow)
