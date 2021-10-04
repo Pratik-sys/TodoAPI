@@ -2,7 +2,7 @@
 
 - Todo Api is implemented with [Flask](https://flask.palletsprojects.com/en/2.0.x/) Framework and  [Flask Rest-x](https://flask-restx.readthedocs.io/en/latest/index.html) for quickly building  Resful Apis.
 
-- Api has Token based Authorization, [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/en/stable/) helps generating these tokes for the user to access the content.
+- Authentication and Authorization of the API is done with [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/en/stable/)
 
 ### Technologies
 ---
@@ -20,7 +20,7 @@
 - To run this project, install requiremnts.txt
 
     ```python 
-    $ pip install -r requireents.txt
+    $ pip install -r requirements.txt
     ```
 - Run the main file to get the server runing on your local machine
     ```python
@@ -28,6 +28,43 @@
     ```
 
 - you can test the Api in [Postman](https://www.postman.com/) for better visualization
+
+## list of endpoints
+
+> if you are running the server on localhost the prefix to all the endpoints will be `http://127.0.0.1:5000/`
+---
+```bash
+/users/register
+```
+```bash
+/users/login
+```
+```bash
+/todos/getAll
+```
+```bash
+/todos/add
+```
+```bash
+/todos/<todo_id>update
+```
+```bash
+/todos/<todo_id>/delete
+```
+```bash
+/subtasks/<todo_id>getAll
+```
+```bash
+/subtasks/<todo_id>/add
+```
+```bash
+/subtasks/<subtask_id>/update
+```
+```bash
+/subtasks/<subtask_id>/delete
+```
+
+> `Note` :- The swagger is been disabled intentionally, you can test the API on `Postman`
 
 ### View Deployment
 ---
