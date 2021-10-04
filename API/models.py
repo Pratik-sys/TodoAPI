@@ -1,3 +1,4 @@
+from mongoengine.fields import ListField
 from API import db, jwt
 from datetime import datetime
 
@@ -15,15 +16,15 @@ class User(db.Document):
     date = db.DateTimeField(default=datetime.utcnow)
 
 
+class Subtask(db.EmbeddedDocument):
+    taskName = db.StringField()
+    completed = db.BooleanField(default=False)
+    date = db.DateTimeField(default=datetime.utcnow)
+
+
 class Todo(db.Document):
     user = db.ReferenceField(User)
     title = db.StringField()
     theme = db.StringField()
     date = db.DateTimeField(default=datetime.utcnow)
-
-
-class Subtask(db.Document):
-    todo = db.ReferenceField(Todo, reverse_delete_rule=db.CASCADE)
-    taskName = db.StringField()
-    completed = db.BooleanField(default=False)
-    date = db.DateTimeField(default=datetime.utcnow)
+    subtasks = ListField(db.EmbeddedDocumentField(Subtask))
