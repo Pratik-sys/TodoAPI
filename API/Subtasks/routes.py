@@ -9,12 +9,12 @@ from flask_jwt_extended import jwt_required
 subtasks = Namespace("subtasks")
 
 
-@subtasks.route("/<string:subtask_id>")
+@subtasks.route("/<string:todo_id>/getAll")
 class ListAllSubtasks(Resource):
     @jwt_required()
-    def get(self, subtask_id: str):
+    def get(self, todo_id: str):
         try:
-            todosub = Todo.objects(subtasks__subid=subtask_id).all()
+            todosub = Todo.objects(id=todo_id).first()
             if len(todosub.subtasks) > 0:
                 return jsonify(todosub.subtasks)
             else:
