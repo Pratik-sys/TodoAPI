@@ -70,7 +70,7 @@ class UpdateSubtaskData(Resource):
                 for i in todosub.subtasks:
                     if str(i.subid) == subtask_id:
                         i.taskName = bleach.clean(record["taskname"])
-                        i.completed = record["completed"]
+                        i.completed = i.completed or record["completed"]
                 todosub.save()
                 return jsonify({"Msg": "Subtak updated successfully"}, 200)
             else:

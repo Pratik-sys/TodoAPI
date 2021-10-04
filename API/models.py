@@ -1,4 +1,3 @@
-from mongoengine.fields import ListField
 from API import db, jwt
 from datetime import datetime
 from bson import ObjectId
@@ -29,4 +28,4 @@ class Todo(db.Document):
     title = db.StringField()
     theme = db.StringField()
     date = db.DateTimeField(default=datetime.utcnow)
-    subtasks = ListField(db.EmbeddedDocumentField(Subtask))
+    subtasks = db.ListField(db.EmbeddedDocumentField(Subtask))
