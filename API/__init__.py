@@ -1,4 +1,5 @@
 from flask import Flask
+from flask.templating import render_template
 from flask_mongoengine import MongoEngine
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import (
@@ -33,8 +34,10 @@ def create_app(config_class=Config):
         return User.objects(email=identity).first()
 
     from .register_namsapce import blueprint as api
+    from .Utils.utils import utils
 
     app.register_blueprint(api)
+    app.register_blueprint(utils)
 
     @app.after_request
     def refresh_expiring_jwts(response):
@@ -48,5 +51,4 @@ def create_app(config_class=Config):
             return response
         except (RuntimeError, KeyError):
             return response
-
     return app

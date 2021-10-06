@@ -9,7 +9,6 @@ from flask_jwt_extended import create_access_token
 
 users = Namespace("users")
 
-
 @users.route("/register")
 class RegisterUser(Resource):
     def post(self):
