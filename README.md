@@ -38,41 +38,41 @@
 ---
 ## User Endpoints
 ```bash
-/users/register
+api/users/register
 ```
 ```bash
-/users/login
+api/users/login
 ```
 ---
 
 ## Todo Endpoints
 ```bash
-/todos/getAll
+api/todos/getAll
 ```
 ```bash
-/todos/add
+api/todos/add
 ```
 ```bash
-/todos/<todo_id>update
+api/todos/<todo_id>update
 ```
 ```bash
-/todos/<todo_id>/delete
+api/todos/<todo_id>/delete
 ```
 
 -----
 
 ## Subtask Endppoints
 ```bash
-/subtasks/<todo_id>getAll
+api/subtasks/<todo_id>getAll
 ```
 ```bash
-/subtasks/<todo_id>/add
+api/subtasks/<todo_id>/add
 ```
 ```bash
-/subtasks/<subtask_id>/update
+api/subtasks/<subtask_id>/update
 ```
 ```bash
-/subtasks/<subtask_id>/delete
+api/subtasks/<subtask_id>/delete
 ```
 
 > `Note` :- The swagger is been disabled intentionally, you can test the API on `Postman`
