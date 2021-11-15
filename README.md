@@ -29,9 +29,6 @@
 
 - you can test the Api in [Postman](https://www.postman.com/) for better visualization
 
-### View Deployment
----
-> https://dynamic-todo-api.herokuapp.com/
 ## list of endpoints
 
 > if you are running the server on localhost the prefix to all the endpoints will be `http://127.0.0.1:5000/`
